@@ -15,11 +15,16 @@ class UpcomingViewModel(
     private val repository: UpcomingContract.Repository
 ) : ViewModel(), DefaultLifecycleObserver {
 
+    val updating = mutableStateOf(false)
     val upcoming = mutableStateOf<Shift?>(null)
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch { repository.upcomingShift.collect { upcoming.value = it } }
+    }
+
+    fun addShift() = viewModelScope.launch {
+        repository.addShift()
     }
 
     //factory

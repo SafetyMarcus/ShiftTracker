@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Shift(
-    val type: String,
-    val startTime: Timestamp,
-    val duration: Int,
+    val type: String = "early",
+    val startTime: Timestamp = Timestamp.now(),
+    val duration: Int = 510,
 )
