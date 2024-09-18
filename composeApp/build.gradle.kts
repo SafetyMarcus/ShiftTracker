@@ -65,6 +65,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelcompose)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.firebase.firestore)
+            implementation(libs.kotlinx.datetime)
         }
     }
 }

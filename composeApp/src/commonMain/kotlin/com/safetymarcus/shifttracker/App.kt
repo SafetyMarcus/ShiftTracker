@@ -1,6 +1,7 @@
 package com.safetymarcus.shifttracker
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -11,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.safetymarcus.shifttracker.components.Month
 import com.safetymarcus.shifttracker.components.NewShift
 import com.safetymarcus.shifttracker.components.UpcomingShift
 import com.safetymarcus.shifttracker.theme.AppTheme
@@ -24,6 +27,9 @@ fun App(
 ) = AppTheme {
     val shift by remember { model.upcoming }
     var showingNewShift by remember { mutableStateOf(false) }
+    //TODO migrate to monthly list with with default month selection driven through VM
+    val currentMonth by remember { mutableStateOf(currentMonth()) }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { showingNewShift = true }) {
@@ -31,16 +37,18 @@ fun App(
             }
         }
     ) {
-        Box {
-            UpcomingShift(shift)
-            if (showingNewShift)
-                NewShift(
-                    onConfirm = {
-                        showingNewShift = false
-                        model.addShift()
-                    },
-                    onDismiss = { showingNewShift = false }
-                )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item { UpcomingShift(shift) }
+            item { Month(currentMonth) }
         }
+        if (showingNewShift) NewShift(
+            onConfirm = {
+                showingNewShift = false
+                model.addShift()
+            },
+            onDismiss = { showingNewShift = false }
+        )
     }
 }

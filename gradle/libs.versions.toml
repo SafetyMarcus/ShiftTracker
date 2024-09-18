@@ -33,6 +33,7 @@ androidx-lifecycle-viewmodelcompose = { group = "org.jetbrains.androidx.lifecycl
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.6.1" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
