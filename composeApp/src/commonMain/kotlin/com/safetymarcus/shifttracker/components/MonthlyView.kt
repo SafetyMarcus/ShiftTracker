@@ -8,10 +8,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.times
 import com.safetymarcus.shifttracker.daysInMonth
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Month(
     month: Int,
@@ -43,7 +42,7 @@ fun Month(
 
     val size by remember { mutableStateOf(80.dp) } //TODO calculate at runtime
     Box(
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        modifier = Modifier.fillMaxWidth()
     ){
         repeat(dayCount) {
             val column = (it % 5)
@@ -84,40 +83,51 @@ fun Day(
 
     val absoluteDistance = maxOf(xDistanceFromSelected.absoluteValue, yDistanceFromSelected.absoluteValue)
     val scale by animateFloatAsState(
-        if (selected) 1.5f
-        else if (absoluteDistance == 0) 1f
-        else if (absoluteDistance > 1) 0.8f
-        else 0.9f,
+        when {
+            selected -> 1f
+            absoluteDistance == 0 -> 0.6f
+            absoluteDistance > 1 -> 0.4f
+            else -> 0.5f
+        },
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioHighBouncy,
-            stiffness = Spring.StiffnessLow,
+            dampingRatio =
+            if (selected) Spring.DampingRatioMediumBouncy
+            else Spring.DampingRatioMediumBouncy,
+            stiffness =
+            if (selected) Spring.StiffnessMediumLow
+            else Spring.StiffnessLow,
         )
     )
 
     val targetXOffset by animateDpAsState(
-        if (xDistanceFromSelected == 1 || xDistanceFromSelected == 3) 2.dp/xDistanceFromSelected
-        else if (xDistanceFromSelected == 2) 4.dp/xDistanceFromSelected
-        else 0.dp,
+        when (xDistanceFromSelected) {
+            1, 3 -> 2.dp/xDistanceFromSelected
+            2 -> 4.dp/xDistanceFromSelected
+            else -> 0.dp
+        },
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium,
+            stiffness = Spring.StiffnessMediumLow,
         )
     )
 
     val targetYOffset by animateDpAsState(
-        if (yDistanceFromSelected == 1 || yDistanceFromSelected == 3) 2.dp/yDistanceFromSelected
-        else if (yDistanceFromSelected == 2) 4.dp
-        else 0.dp,
+        when (yDistanceFromSelected) {
+            1, 3 -> 2.dp/yDistanceFromSelected
+            2 -> 4.dp
+            else -> 0.dp
+        },
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium,
+            stiffness = Spring.StiffnessMediumLow,
         )
     )
 
-    Text(
-        modifier = Modifier
+    Box(
+        modifier = Modifier.size(96.dp)
             .offset(x, y)
-            .size(64.dp)
+            .clip(CircleShape)
+            .clickable { onClick() }
             .graphicsLayer {
                 translationX = targetXOffset.toPx()
                 translationY = targetYOffset.toPx()
@@ -125,10 +135,13 @@ fun Day(
                 scaleY = scale
             }
             .background(color, shape = CircleShape)
-            .clickable { onClick() },
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.labelMedium,
-        color = textColor,
-        text = "$day"
-    )
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium,
+            color = textColor,
+            text = "$day"
+        )
+    }
 }
