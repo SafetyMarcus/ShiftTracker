@@ -29,6 +29,7 @@ fun App(
     var showingNewShift by remember { mutableStateOf(false) }
     //TODO migrate to monthly list with with default month selection driven through VM
     val currentMonth by remember { mutableStateOf(currentMonth()) }
+    val currentDay by remember { mutableStateOf(currentDay()) }
 
     Scaffold(
         floatingActionButton = {
@@ -41,7 +42,12 @@ fun App(
             modifier = Modifier.fillMaxSize()
         ) {
             item { UpcomingShift(shift) }
-            item { Month(currentMonth) }
+            item {
+                Month(
+                    month = currentMonth,
+                    today = currentDay
+                )
+            }
         }
         if (showingNewShift) NewShift(
             onConfirm = {

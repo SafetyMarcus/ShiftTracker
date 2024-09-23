@@ -2,6 +2,7 @@ package com.safetymarcus.shifttracker
 
 import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
@@ -27,12 +28,13 @@ actual fun currentMonth(): Int {
     return calendar.component(NSMonthCalendarUnit, NSDate()).toInt()
 }
 
+actual fun currentDay(): Int {
+    val calendar = NSCalendar.currentCalendar
+    return calendar.component(NSDayCalendarUnit, NSDate()).toInt()
+}
+
 @OptIn(ExperimentalForeignApi::class)
 actual fun daysInMonth(month: Int): Int {
     val calendar = NSCalendar.currentCalendar
-    return calendar.rangeOfUnit(
-        smaller = NSDayCalendarUnit,
-        inUnit = NSMonthCalendarUnit,
-        forDate = NSDate()
-    ).size
+    calendar.maximumRangeOfUnit(NSDayCalendarUnit).useContents { return this.length.toInt() }
 }

@@ -7,4 +7,6 @@ expect val Timestamp.timeString: String
 
 expect fun currentMonth(): Int
 
+expect fun currentDay(): Int
+
 expect fun daysInMonth(month: Int): Int

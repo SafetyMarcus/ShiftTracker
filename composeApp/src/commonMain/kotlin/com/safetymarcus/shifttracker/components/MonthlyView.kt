@@ -42,9 +42,10 @@ const val columnCount = 7
 @Composable
 fun Month(
     month: Int,
+    today: Int,
 ) {
     val dayCount by remember { derivedStateOf { daysInMonth(month) } }
-    var selectedDay by remember { mutableStateOf(0) } //TODO pass in driven by model
+    var selectedDay by remember { mutableStateOf(today - 1) } //-1 to 0 index
     val selectedColumn by remember { derivedStateOf { selectedDay % columnCount } }
     val selectedRow by remember { derivedStateOf { selectedDay / columnCount } }
     var cellSize by remember { mutableStateOf(0.dp) }
