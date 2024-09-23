@@ -1,9 +1,13 @@
 package com.safetymarcus.shifttracker.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.ExperimentalTransitionApi
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,11 +37,12 @@ import androidx.compose.ui.unit.times
 import com.safetymarcus.shifttracker.daysInMonth
 import kotlin.math.absoluteValue
 
+const val columnCount = 7
+
 @Composable
 fun Month(
     month: Int,
 ) {
-    val columnCount = 7
     val dayCount by remember { derivedStateOf { daysInMonth(month) } }
     var selectedDay by remember { mutableStateOf(0) } //TODO pass in driven by model
     val selectedColumn by remember { derivedStateOf { selectedDay % columnCount } }
@@ -117,59 +122,18 @@ fun Day(
     y: Dp,
     onClick: () -> Unit = {}
 ) {
-    val color by animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.secondary
-    )
-    val textColor by animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onPrimary
-    )
+    val color by rememberBackgroundColor(selected)
+    val textColor by rememberTextColor(selected)
 
-    val absoluteDistance = maxOf(
-        xDistanceFromSelected.absoluteValue,
-        yDistanceFromSelected.absoluteValue
-    )
-    val scale by animateFloatAsState(
-        when {
-            selected -> 1f
-            absoluteDistance == 0 -> 0.6f
-            absoluteDistance > 1 -> 0.4f
-            else -> 0.5f
-        },
-        animationSpec = spring(
-            dampingRatio =
-            if (selected) Spring.DampingRatioMediumBouncy
-            else Spring.DampingRatioMediumBouncy,
-            stiffness =
-            if (selected) Spring.StiffnessMediumLow
-            else Spring.StiffnessLow,
+    val scale by rememberScale(
+        selected = selected,
+        absoluteDistance = maxOf(
+            xDistanceFromSelected.absoluteValue,
+            yDistanceFromSelected.absoluteValue
         )
     )
-
-    val targetXOffset by animateDpAsState(
-        when (xDistanceFromSelected) {
-            1, 3 -> 2.dp / xDistanceFromSelected
-            2 -> 4.dp / xDistanceFromSelected
-            else -> 0.dp
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow,
-        )
-    )
-
-    val targetYOffset by animateDpAsState(
-        when (yDistanceFromSelected) {
-            1, 3 -> 2.dp / yDistanceFromSelected
-            2 -> 4.dp
-            else -> 0.dp
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow,
-        )
-    )
+    val targetXOffset by rememberXOffset(xDistanceFromSelected)
+    val targetYOffset by rememberYOffset(yDistanceFromSelected)
 
     Box(
         modifier = Modifier.size(width)
@@ -185,11 +149,81 @@ fun Day(
             .background(color, shape = CircleShape)
     ) {
         Text(
-            modifier = Modifier.align(Alignment.Center),
+            modifier = Modifier.align(rememberLabelTransition(selected).targetState),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,
             color = textColor,
             text = "$day"
         )
     }
+}
+
+@Composable
+private fun rememberBackgroundColor(selected: Boolean) = animateColorAsState(
+    if (selected) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.secondary
+)
+
+@Composable
+private fun rememberTextColor(selected: Boolean) = animateColorAsState(
+    if (selected) MaterialTheme.colorScheme.onPrimary
+    else MaterialTheme.colorScheme.onPrimary
+)
+
+@Composable
+private fun rememberScale(
+    selected: Boolean,
+    absoluteDistance: Int
+) = animateFloatAsState(
+    when {
+        selected -> 1f
+        absoluteDistance == 0 -> 0.6f
+        absoluteDistance > 1 -> 0.4f
+        else -> 0.5f
+    },
+    animationSpec = spring(
+        dampingRatio =
+        if (selected) Spring.DampingRatioMediumBouncy
+        else Spring.DampingRatioMediumBouncy,
+        stiffness =
+        if (selected) Spring.StiffnessMediumLow
+        else Spring.StiffnessLow,
+    )
+)
+
+@Composable
+private fun rememberXOffset(xDistanceFromSelected: Int) = animateDpAsState(
+    when (xDistanceFromSelected) {
+        1, 3 -> 2.dp / xDistanceFromSelected
+        2 -> 4.dp / xDistanceFromSelected
+        else -> 0.dp
+    },
+    animationSpec = spring(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMediumLow,
+    )
+)
+
+@Composable
+private fun rememberYOffset(yDistanceFromSelected: Int) = animateDpAsState(
+    when (yDistanceFromSelected) {
+        1, 3 -> 2.dp / yDistanceFromSelected
+        2 -> 4.dp
+        else -> 0.dp
+    },
+    animationSpec = spring(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMediumLow,
+    )
+)
+
+@OptIn(ExperimentalTransitionApi::class)
+@Composable
+private fun rememberLabelTransition(selected: Boolean): Transition<Alignment> {
+    val state = remember { MutableTransitionState(Alignment.Center) }
+    val transition = rememberTransition(
+        transitionState = state
+    )
+    state.targetState = if (selected) Alignment.TopCenter else Alignment.Center
+    return transition
 }
