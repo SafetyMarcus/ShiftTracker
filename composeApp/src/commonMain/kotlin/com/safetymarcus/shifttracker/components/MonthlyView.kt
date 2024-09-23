@@ -62,6 +62,7 @@ fun Month(
                 day = it,
                 width = cellSize,
                 x = it * cellSize,
+                selected = selectedColumn == it,
             )
         }
         repeat(dayCount) {
@@ -84,31 +85,42 @@ fun Month(
 fun DayHeader(
     day: Int,
     width: Dp,
-    x: Dp
+    x: Dp,
+    selected: Boolean,
 ) = Box(
     modifier = Modifier.size(width),
     contentAlignment = Alignment.Center,
 ) {
-    val text by remember {
-        derivedStateOf {
-            when (day) {
-                0 -> "S"
-                1 -> "M"
-                2 -> "T"
-                3 -> "W"
-                4 -> "T"
-                5 -> "F"
-                6 -> "S"
-                else -> ""
-            }
-        }
-    }
-
+    val text by rememberDayText(day)
+    val textColor by rememberHeaderColor(selected)
     Text(
         modifier = Modifier.offset(x = x),
         style = MaterialTheme.typography.titleMedium,
         text = text,
+        color = textColor,
     )
+}
+
+@Composable
+private fun rememberHeaderColor(selected: Boolean) = animateColorAsState(
+    if (selected) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.onSurface
+)
+
+@Composable
+private fun rememberDayText(day: Int) = remember {
+    derivedStateOf {
+        when (day) {
+            0 -> "S"
+            1 -> "M"
+            2 -> "T"
+            3 -> "W"
+            4 -> "T"
+            5 -> "F"
+            6 -> "S"
+            else -> ""
+        }
+    }
 }
 
 @Composable
@@ -134,7 +146,7 @@ fun Day(
     )
     val targetXOffset by rememberXOffset(xDistanceFromSelected)
     val targetYOffset by rememberYOffset(yDistanceFromSelected)
-
+    val alignment = rememberLabelTransition(selected)
     Box(
         modifier = Modifier.size(width)
             .offset(x, y)
@@ -149,7 +161,7 @@ fun Day(
             .background(color, shape = CircleShape)
     ) {
         Text(
-            modifier = Modifier.align(rememberLabelTransition(selected).targetState),
+            modifier = Modifier.align(alignment.targetState),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,
             color = textColor,
@@ -167,7 +179,7 @@ private fun rememberBackgroundColor(selected: Boolean) = animateColorAsState(
 @Composable
 private fun rememberTextColor(selected: Boolean) = animateColorAsState(
     if (selected) MaterialTheme.colorScheme.onPrimary
-    else MaterialTheme.colorScheme.onPrimary
+    else MaterialTheme.colorScheme.onSecondary
 )
 
 @Composable
