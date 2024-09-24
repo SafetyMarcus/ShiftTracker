@@ -7,6 +7,6 @@ interface UpcomingContract {
     interface Repository {
         val updating: MutableStateFlow<Boolean>
         val upcomingShift: MutableStateFlow<Shift?>
-        suspend fun addShift()
+        suspend fun addShift(millis: Long)
     }
 }

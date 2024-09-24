@@ -23,8 +23,10 @@ class UpcomingViewModel(
         viewModelScope.launch { repository.upcomingShift.collect { upcoming.value = it } }
     }
 
-    fun addShift() = viewModelScope.launch {
-        repository.addShift()
+    fun addShift(
+        millis: Long
+    ) = viewModelScope.launch {
+        repository.addShift(millis)
     }
 
     //factory

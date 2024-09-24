@@ -52,7 +52,7 @@ fun App(
         if (showingNewShift) NewShift(
             onConfirm = {
                 showingNewShift = false
-                model.addShift()
+                it?.let { model.addShift(it) }
             },
             onDismiss = { showingNewShift = false }
         )

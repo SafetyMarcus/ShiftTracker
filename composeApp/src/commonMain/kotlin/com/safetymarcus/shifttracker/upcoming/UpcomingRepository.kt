@@ -6,7 +6,9 @@ import androidx.lifecycle.coroutineScope
 import com.safetymarcus.shifttracker.models.Shift
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.Direction
+import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.firestore
+import dev.gitlive.firebase.firestore.fromMilliseconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -18,17 +20,23 @@ object UpcomingRepository : UpcomingContract.Repository, DefaultLifecycleObserve
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         owner.lifecycle.coroutineScope.launch {
-            upcomingShift.value = Firebase.firestore
+            Firebase.firestore
                 .collection("shifts")
                 .orderBy("startTime", Direction.DESCENDING)
+                .where { "startTime" greaterThan Timestamp.now() }
                 .limit(1)
-                .get()
-                .documents.firstOrNull()
-                ?.data(Shift.serializer())
+                .snapshots()
+                .collect {
+                    upcomingShift.value = it.documents.firstOrNull()?.data(Shift.serializer())
+                }
         }
     }
 
-    override suspend fun addShift() {
-        Firebase.firestore.collection("shifts").add(Shift())
+    override suspend fun addShift(millis: Long) {
+        Firebase.firestore
+            .collection("shifts")
+            .add(
+                Shift(startTime = Timestamp.fromMilliseconds(millis.toDouble()))
+            )
     }
 }
