@@ -2,8 +2,8 @@ package com.safetymarcus.shifttracker.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +18,7 @@ import com.safetymarcus.shifttracker.timeString
 fun UpcomingShift(
     shift: Shift?
 ) = Column(
-    modifier = Modifier.fillMaxSize(),
+    modifier = Modifier.fillMaxWidth().padding(top = Medium, bottom = Medium),
     verticalArrangement = Arrangement.Center,
     horizontalAlignment = Alignment.CenterHorizontally
 ) {
@@ -46,5 +46,9 @@ fun UpcomingShift(
             text = shift.startTime.timeString,
             style = MaterialTheme.typography.displayLarge
         )
-    } ?: CircularProgressIndicator()
+    } ?: Text(
+        textAlign = TextAlign.Center,
+        text = "No upcoming shifts",
+        style = MaterialTheme.typography.titleLarge
+    )
 }

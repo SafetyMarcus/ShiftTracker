@@ -23,6 +23,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,20 +37,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.safetymarcus.shifttracker.daysInMonth
 import kotlin.math.absoluteValue
 
 const val columnCount = 7
 
 @Composable
 fun Month(
-    month: Int,
-    today: Int,
+    calendarState: CalendarState
 ) {
-    val dayCount by remember { derivedStateOf { daysInMonth(month) } }
-    var selectedDay by remember { mutableStateOf(today - 1) } //-1 to 0 index
-    val selectedColumn by remember { derivedStateOf { selectedDay % columnCount } }
-    val selectedRow by remember { derivedStateOf { selectedDay / columnCount } }
+    val selectedColumn by remember { derivedStateOf { calendarState.selectedDay % columnCount } }
+    val selectedRow by remember { derivedStateOf { calendarState.selectedDay / columnCount } }
     var cellSize by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
 
@@ -66,19 +65,54 @@ fun Month(
                 selected = selectedColumn == it,
             )
         }
-        repeat(dayCount) {
+        repeat(calendarState.dayCount) {
             val column = (it % columnCount)
             val row = it / columnCount
             Day(
                 day = it + 1,
                 width = cellSize,
-                selected = selectedDay == it,
+                selected = calendarState.selectedDay == it,
                 x = column * cellSize,
                 y = (row + 1) * cellSize,
                 xDistanceFromSelected = -(column - selectedColumn),
                 yDistanceFromSelected = -(row - selectedRow),
-            ) { selectedDay = it }
+            ) { calendarState.selectedDay = it }
         }
+    }
+}
+
+@Composable
+fun rememberCalendarState(
+    days: Int,
+    selectedDate: Int
+) = rememberSaveable(saver = CalendarState.Saver()) {
+    CalendarState(
+        days = days,
+        selectedDate = selectedDate
+    )
+}
+
+class CalendarState(
+    days: Int,
+    selectedDate: Int
+) {
+    val _days = mutableStateOf(days)
+    var _selectedDate = mutableStateOf(selectedDate)
+    val dayCount get() = _days.value
+    var selectedDay
+        get() = _selectedDate.value
+        set(value) = _selectedDate.run { this.value = value }
+
+    companion object {
+        fun Saver(): Saver<CalendarState, Any> = listSaver(
+            save = { listOf(it.dayCount, it.selectedDay) },
+            restore = {
+                CalendarState(
+                    days = it[0],
+                    selectedDate = it[1]
+                )
+            }
+        )
     }
 }
 

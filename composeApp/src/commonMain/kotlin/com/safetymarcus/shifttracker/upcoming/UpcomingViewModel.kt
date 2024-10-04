@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.safetymarcus.shifttracker.models.Shift
+import com.safetymarcus.shifttracker.models.ShiftType
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
@@ -20,13 +21,23 @@ class UpcomingViewModel(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        viewModelScope.launch { repository.upcomingShift.collect { upcoming.value = it } }
+        repository.updating
+        viewModelScope.launch {
+            repository.updating.collect { updating.value = it }
+        }
+        viewModelScope.launch {
+            repository.upcomingShift.collect { upcoming.value = it }
+        }
     }
 
     fun addShift(
-        millis: Long
+        millis: Long,
+        shiftType: ShiftType,
     ) = viewModelScope.launch {
-        repository.addShift(millis)
+        repository.addShift(
+            millis = millis,
+            shiftType = shiftType,
+        )
     }
 
     //factory
