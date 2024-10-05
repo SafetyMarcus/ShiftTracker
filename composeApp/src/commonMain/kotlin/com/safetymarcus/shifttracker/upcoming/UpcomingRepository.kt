@@ -9,7 +9,6 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.Direction
 import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.firestore
-import dev.gitlive.firebase.firestore.fromMilliseconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -20,6 +19,7 @@ object UpcomingRepository : UpcomingContract.Repository, DefaultLifecycleObserve
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        updating.value = true
         owner.lifecycle.coroutineScope.launch {
             Firebase.firestore
                 .collection("shifts")
@@ -29,6 +29,7 @@ object UpcomingRepository : UpcomingContract.Repository, DefaultLifecycleObserve
                 .snapshots()
                 .collect {
                     upcomingShift.value = it.documents.firstOrNull()?.data(Shift.serializer())
+                    updating.value = false
                 }
         }
     }
@@ -41,7 +42,7 @@ object UpcomingRepository : UpcomingContract.Repository, DefaultLifecycleObserve
             .collection("shifts")
             .add(
                 Shift(
-                    startTime = Timestamp.fromMilliseconds(millis.toDouble()),
+                    startTime = shiftType.getTimestamp(millis, shiftType.startTime),
                     _type = shiftType.name,
                 )
             )

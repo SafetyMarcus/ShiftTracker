@@ -10,7 +10,7 @@ actual val Timestamp.dateString: String
     get() = SimpleDateFormat("dd\nMMMM", Locale.ENGLISH).format(Date(this.seconds * 1000))
 
 actual val Timestamp.timeString: String
-    get() = SimpleDateFormat("HH:mm aa", Locale.ENGLISH).format(Date(this.seconds * 1000))
+    get() = SimpleDateFormat("h:mm aa", Locale.ENGLISH).format(Date(this.seconds * 1000))
 
 val calendar = GregorianCalendar()
 

@@ -3,6 +3,8 @@ package com.safetymarcus.shifttracker
 import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toNSDate
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
@@ -15,22 +17,22 @@ actual val Timestamp.dateString: String
     get() = NSDateFormatter.new()?.apply {
         setTimeZone(NSTimeZone.localTimeZone())
         setDateFormat("dd MMMM")
-    }?.stringFromDate(NSDate(timeIntervalSinceReferenceDate = this.seconds.toDouble())) ?: ""
+    }?.stringFromDate(Instant.fromEpochSeconds(this.seconds).toNSDate()) ?: ""
 
 actual val Timestamp.timeString: String
     get() = NSDateFormatter.new()?.apply {
         setTimeZone(NSTimeZone.localTimeZone())
-        setDateFormat("HH:mm aa")
-    }?.stringFromDate(NSDate(timeIntervalSinceReferenceDate = this.seconds.toDouble())) ?: ""
+        setDateFormat("h:mm aa")
+    }?.stringFromDate(Instant.fromEpochSeconds(this.seconds).toNSDate()) ?: ""
 
 actual fun currentMonth(): Int {
     val calendar = NSCalendar.currentCalendar
-    return calendar.component(NSMonthCalendarUnit, NSDate()).toInt()
+    return calendar.component(NSMonthCalendarUnit, NSDate()).toInt() - 1 // 1-indexed -> 0-indexed to match android
 }
 
 actual fun currentDay(): Int {
     val calendar = NSCalendar.currentCalendar
-    return calendar.component(NSDayCalendarUnit, NSDate()).toInt()
+    return calendar.component(NSDayCalendarUnit, NSDate()).toInt() - 1 // 1-indexed -> 0-indexed to match android
 }
 
 @OptIn(ExperimentalForeignApi::class)
