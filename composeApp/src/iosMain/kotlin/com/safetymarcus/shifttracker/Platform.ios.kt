@@ -32,7 +32,7 @@ actual fun currentMonth(): Int {
 
 actual fun currentDay(): Int {
     val calendar = NSCalendar.currentCalendar
-    return calendar.component(NSDayCalendarUnit, NSDate()).toInt() - 1 // 1-indexed -> 0-indexed to match android
+    return calendar.component(NSDayCalendarUnit, NSDate()).toInt()
 }
 
 @OptIn(ExperimentalForeignApi::class)

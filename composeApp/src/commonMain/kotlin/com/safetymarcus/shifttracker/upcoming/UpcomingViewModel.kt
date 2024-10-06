@@ -1,33 +1,43 @@
 package com.safetymarcus.shifttracker.upcoming
 
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.safetymarcus.shifttracker.core.JobRegister
+import com.safetymarcus.shifttracker.core.LifecycleAwareViewModel
 import com.safetymarcus.shifttracker.models.Shift
 import com.safetymarcus.shifttracker.models.ShiftType
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 class UpcomingViewModel(
     private val repository: UpcomingContract.Repository
-) : ViewModel(), DefaultLifecycleObserver {
+) : LifecycleAwareViewModel() {
 
     val updating = mutableStateOf(false)
+    val updatingNextShift = mutableStateOf(false)
+    val updatingRecentShifts = mutableStateOf(false)
     val upcoming = mutableStateOf<Shift?>(null)
+    val shifts = mutableStateMapOf<Int, List<Shift>>()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        repository.updating
-        viewModelScope.launch {
-            repository.updating.collect { updating.value = it }
-        }
-        viewModelScope.launch {
-            repository.upcomingShift.collect { upcoming.value = it }
-        }
+    private val jobs = arrayListOf<Job>()
+
+    override fun JobRegister.registerJobs() {
+        register { repository.updatingNextShift.collect { updatingNextShift.value = it } }
+        register { repository.updatingRecentShifts.collect { updatingRecentShifts.value = it } }
+        register { repository.updating.collect { updating.value = it } }
+        register { repository.upcomingShift.collect { upcoming.value = it } }
+        register { repository.shifts.collect { shifts.putAll(it) } }
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+        jobs.forEach { it.cancel() }
     }
 
     fun addShift(

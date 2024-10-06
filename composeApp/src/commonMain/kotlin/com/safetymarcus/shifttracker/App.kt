@@ -55,9 +55,7 @@ fun App(
             if (updating) item {
                 Row(Modifier.padding(Medium)) { CircularProgressIndicator() }
             } else item { UpcomingShift(shift) }
-            item {
-                Month(calendarState)
-            }
+            item { Month(calendarState) }
         }
         if (showingNewShift) NewShift(
             startingDate = calendarState.selectedDay,

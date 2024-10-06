@@ -16,7 +16,7 @@ val calendar = GregorianCalendar()
 
 actual fun currentMonth(): Int = calendar.apply { time = Date() }.get(GregorianCalendar.MONTH)
 
-actual fun currentDay(): Int = calendar.apply { time = Date() }.get(GregorianCalendar.DAY_OF_MONTH)
+actual fun currentDay(): Int = calendar.apply { time = Date() }.get(GregorianCalendar.DAY_OF_MONTH) - 1
 
 actual fun daysInMonth(month: Int): Int = calendar.apply {
     set(GregorianCalendar.MONTH, month)
