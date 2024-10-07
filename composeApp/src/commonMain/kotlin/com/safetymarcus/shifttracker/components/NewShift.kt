@@ -2,6 +2,7 @@ package com.safetymarcus.shifttracker.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -34,6 +35,11 @@ fun NewShift(
         onDismissRequest = onDismiss
     ) {
         Column {
+            Text(
+                text = date.toString(),
+                style = MaterialTheme.typography.labelMedium
+            )
+            MediumSpacer()
             when (inputState) {
                 Input.Type -> {
                     Button(onClick = { shiftType = ShiftType.EARLY }) { Text("Early") }
@@ -44,7 +50,7 @@ fun NewShift(
 
                 Input.Time -> TODO("Support custom types")
             }
-
+            MediumSpacer()
             Button(
                 onClick = {
                     when (inputState) {
