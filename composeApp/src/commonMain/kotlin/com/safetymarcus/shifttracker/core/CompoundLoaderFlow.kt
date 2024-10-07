@@ -19,8 +19,8 @@ class CompoundLoaderFlow(
     }
 
     override var value: Boolean
-        get() = flows.any { it.value }
-        set(value) {
+        get() = flows.all { it.value }
+        set(_) {
             throw UnsupportedOperationException("Cannot set value of CompoundLoaderFlow")
         }
 }

@@ -4,9 +4,12 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.safetymarcus.shifttracker.core.CompoundLoaderFlow
+import com.safetymarcus.shifttracker.currentMonthOrdinal
 import com.safetymarcus.shifttracker.models.Shift
 import com.safetymarcus.shifttracker.models.ShiftType
+import com.safetymarcus.shifttracker.nextMonth
 import com.safetymarcus.shifttracker.onIO
+import com.safetymarcus.shifttracker.previousMonth
 import com.safetymarcus.shifttracker.timestamp
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.Direction
@@ -30,7 +33,15 @@ object UpcomingRepository : UpcomingContract.Repository, DefaultLifecycleObserve
     override val updatingRecentShifts = MutableStateFlow(true)
     override val updating = CompoundLoaderFlow(updatingNextShift, updatingRecentShifts)
     override val upcomingShift = MutableStateFlow<Shift?>(null)
-    override val shifts = MutableStateFlow<Map<Int, List<Shift>>>(emptyMap())
+    override val shifts = with(currentMonthOrdinal()) {
+        MutableStateFlow<Map<Int, List<Shift>>>(
+            mapOf(
+                this.previousMonth to emptyList(),
+                this to emptyList(),
+                this.nextMonth to emptyList()
+            ),
+        )
+    }
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)

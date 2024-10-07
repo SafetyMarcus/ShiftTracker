@@ -1,5 +1,6 @@
 package com.safetymarcus.shifttracker.models
 
+import com.benasher44.uuid.uuid4
 import com.safetymarcus.shifttracker.localDateTime
 import com.safetymarcus.shifttracker.timestamp
 import dev.gitlive.firebase.firestore.Timestamp
@@ -8,9 +9,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Shift(
+    val id: String = uuid4().toString(),
     val startTime: Timestamp = Timestamp.now(),
     val duration: Int = 510,
-    var _type: String
+    var _type: String,
+    var deletedAt: Timestamp? = null
 ) {
     val type get() = ShiftType.valueOf(_type)
 

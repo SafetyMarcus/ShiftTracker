@@ -3,7 +3,6 @@ package com.safetymarcus.shifttracker
 import dev.gitlive.firebase.firestore.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.GregorianCalendar
 import java.util.Locale
 
 actual val Timestamp.dateString: String
@@ -11,13 +10,3 @@ actual val Timestamp.dateString: String
 
 actual val Timestamp.timeString: String
     get() = SimpleDateFormat("h:mm aa", Locale.ENGLISH).format(Date(this.seconds * 1000))
-
-val calendar = GregorianCalendar()
-
-actual fun currentMonth(): Int = calendar.apply { time = Date() }.get(GregorianCalendar.MONTH)
-
-actual fun currentDay(): Int = calendar.apply { time = Date() }.get(GregorianCalendar.DAY_OF_MONTH) - 1
-
-actual fun daysInMonth(month: Int): Int = calendar.apply {
-    set(GregorianCalendar.MONTH, month)
-}.getActualMaximum(GregorianCalendar.DAY_OF_MONTH)

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.safetymarcus.shifttracker.daysInMonth
 import kotlin.math.absoluteValue
 
 const val columnCount = 7
@@ -83,33 +84,33 @@ fun Month(
 
 @Composable
 fun rememberCalendarState(
-    days: Int,
-    selectedDate: Int
+    monthOrdinal: Int,
+    selectedDay: Int
 ) = rememberSaveable(saver = CalendarState.Saver()) {
     CalendarState(
-        days = days,
-        selectedDate = selectedDate
+        monthOrdinal = monthOrdinal,
+        selectedDay = selectedDay,
     )
 }
 
 class CalendarState(
-    days: Int,
-    selectedDate: Int
+    var monthOrdinal: Int,
+    selectedDay: Int
 ) {
-    val _days = mutableStateOf(days)
-    var _selectedDate = mutableStateOf(selectedDate)
+    val _days = derivedStateOf { daysInMonth(monthOrdinal) }
+    var _selectedDay = mutableStateOf(selectedDay)
     val dayCount get() = _days.value
     var selectedDay
-        get() = _selectedDate.value
-        set(value) = _selectedDate.run { this.value = value }
+        get() = _selectedDay.value
+        set(value) = _selectedDay.run { this.value = value }
 
     companion object {
         fun Saver(): Saver<CalendarState, Any> = listSaver(
             save = { listOf(it.dayCount, it.selectedDay) },
             restore = {
                 CalendarState(
-                    days = it[0],
-                    selectedDate = it[1]
+                    monthOrdinal = it[0],
+                    selectedDay = it[1]
                 )
             }
         )
